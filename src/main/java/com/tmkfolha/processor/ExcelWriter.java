@@ -18,13 +18,13 @@ public class ExcelWriter {
 
     public void escreverDados(List<Map<String, Map<String, String>>> dataList) {
         File outputFile = new File(filePath);
-        outputFile.getParentFile().mkdirs(); // Criar a pasta caso não exista
+        outputFile.getParentFile().mkdirs(); // Criar diretório caso não exista
 
         Workbook workbook;
         Sheet sheet;
         int rowIndex = 0;
 
-        // Verifica se o arquivo já existe
+        // Tenta abrir um arquivo existente, se ele já existir
         if (outputFile.exists()) {
             try (FileInputStream fis = new FileInputStream(outputFile)) {
                 workbook = new XSSFWorkbook(fis);
@@ -43,14 +43,8 @@ public class ExcelWriter {
             sheet = workbook.createSheet("FOLHA PAGAMENTO");
         }
 
-        // Estilo para título
-        CellStyle estiloTitulo = workbook.createCellStyle();
-        estiloTitulo.setFillForegroundColor(IndexedColors.BLACK.getIndex());
-        estiloTitulo.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-        Font fonteBranca = workbook.createFont();
-        fonteBranca.setColor(IndexedColors.WHITE.getIndex());
-        fonteBranca.setBold(true);
-        estiloTitulo.setFont(fonteBranca);
+        // Criando estilo para título
+        CellStyle estiloTitulo = criarEstiloTitulo(workbook);
 
         for (Map<String, Map<String, String>> data : dataList) {
             for (Map.Entry<String, Map<String, String>> entry : data.entrySet()) {
@@ -77,11 +71,18 @@ public class ExcelWriter {
                     coluna = 0;
                     for (String valor : registros.values()) {
                         Cell cellDado = rowValores.createCell(coluna++);
+                        CellStyle style = workbook.createCellStyle();
+                        DataFormat format = workbook.createDataFormat();
+                        style.setDataFormat(format.getFormat("R$ #,##0.00"));  
+                        
+                        System.out.println("Valor:  L78 write " + valor);
+
                         cellDado.setCellValue(valor);
+                        cellDado.setCellStyle(style);
                     }
                 }
 
-                rowIndex++; // Linha em branco para separar seções
+                rowIndex++; // Adiciona uma linha em branco para separação
             }
         }
 
@@ -98,6 +99,19 @@ public class ExcelWriter {
                 System.err.println("Erro ao fechar o arquivo Excel: " + e.getMessage());
             }
         }
+    }
+
+    private CellStyle criarEstiloTitulo(Workbook workbook) {
+        CellStyle estilo = workbook.createCellStyle();
+        estilo.setFillForegroundColor(IndexedColors.BLACK.getIndex());
+        estilo.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        
+        Font fonteBranca = workbook.createFont();
+        fonteBranca.setColor(IndexedColors.WHITE.getIndex());
+        fonteBranca.setBold(true);
+        
+        estilo.setFont(fonteBranca);
+        return estilo;
     }
 }
 

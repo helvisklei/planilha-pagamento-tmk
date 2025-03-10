@@ -5,11 +5,15 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.print.DocFlavor.STRING;
 
@@ -27,10 +31,13 @@ public class XlsProcessor implements FileProcessor {
 
     @Override
     public void processFile(String filePath) throws IOException {
-       // System.out.println("Processando arquivo L23: " + filePath);
+        // System.out.println("Processando arquivo L23: " + filePath);
         File file = new File(filePath);
         FileInputStream fis = new FileInputStream(file);
         Workbook workbook;
+        
+        // **Chamar a classe ExcelWriter para salvar os dados**
+        ExcelWriter excelWriter = new ExcelWriter();
 
         if (filePath.endsWith(".xlsx")) {
             workbook = new XSSFWorkbook(fis);
@@ -49,12 +56,7 @@ public class XlsProcessor implements FileProcessor {
                 extractedData.add(rowData);
             }
         }
-        //System.out.println(extractedData); // consigo ver os dados
-
-        //fileData.put(file.getName(), mergeData(extractedData));
-        //System.out.println("Dados adicionados ao fileData L48: " + fileData);
-        // Ordenar extractedData por uma coluna específica (exemplo: "Column0")
-        //extractedData.sort(Comparator.comparing(row -> row.getOrDefault("Column0", "")));
+       
         // Ordenar extractedData por uma coluna específica
              extractedData.sort(Comparator.comparing(row -> {
             // Extrair o número da coluna para garantir uma ordenação numérica
@@ -106,102 +108,222 @@ public class XlsProcessor implements FileProcessor {
             // Chamando a função para buscar um termo específico no mapa
             buscarValoresPorNome(fileData, SERRA, "Total  (Recebido-Cheque pré+Cheque Custódia+Boletos ) :");      
         }   */
-        // Dados Situação Mensageiros
-        //if (fileData.containsKey(SITUACAO_MENSAGEIROS)){
-            // Chamando a função para buscar um termo específico no mapa
-            //buscarValoresPorNome(fileData, SITUACAO_MENSAGEIROS, "Cobrador");      
-            //resultadosParaExcel.put(SITUACAO_MENSAGEIROS, buscarValoresPorNomeRetonarLista(fileData, SITUACAO_MENSAGEIROS, "Cobrador"));
-       // }
-        // Dados Geral
-        //if (fileData.containsKey(GERAL)){
-           
-           
-            // Chamando a função para buscar um termo específico no mapa
-           // buscarValoresPorNomeRetonarLista(fileData,  GERAL, "Total  (Recebido-Cheque pré+Cheque Custódia+Boletos ) :"); 
-       // }        
         
-        //if (fileData.containsKey(GERAL) || fileData.containsKey(SERRA)|| fileData.containsKey(PETROLINA)){
-            // Chamando a função para buscar um termo específico no mapa
-            //buscarValoresPorNomeRetonarLista(fileData, GERAL, "Total  (Recebido-Cheque pré+Cheque Custódia+Boletos ) :");  
-          //  resultadosParaExcel.put(GERAL, buscarValoresPorNomeRetonarLista(fileData, GERAL, NOME_PROCURADO));   
-    
-           // resultadosParaExcel.put(SERRA,  buscarValoresPorNomeRetonarLista(fileData, SERRA, NOME_PROCURADO));      
-       
-            // Chamando a função para buscar um termo específico no mapa
-            //resultadosParaExcel.put(PETROLINA, buscarValoresPorNomeRetonarLista(fileData, PETROLINA, NOME_PROCURADO));
-       // } 
        // Verifica se os arquivos que você deseja estão no mapa 'fileData'
        if (fileData.containsKey(GERAL) || fileData.containsKey(SERRA) || fileData.containsKey(PETROLINA)|| fileData.containsKey(MATRIZ)|| fileData.containsKey(CARUARU)|| fileData.containsKey(GARANHUNS)|| fileData.containsKey(SITUACAO_MENSAGEIROS)) {
             // Buscar valores para o arquivo GERAL.XLS e insere no 'resultadosParaExcel'
             if (fileData.containsKey(GERAL)) {
                 List<String> geralValores = buscarValoresPorNomeRetonarLista(fileData, GERAL, NOME_PROCURADO);
-                if (!geralValores.isEmpty()) {
+                ResultadoPolo resultadoGeral = ResultadoPolo.processarValores(GERAL, geralValores);
+                List<String> valoresFormatados = List.of(            
+                    "QTD -> " + resultadoGeral.getQuantidade(),
+                    "VALOR -> " + resultadoGeral.getValor()
+                );
+                resultadosParaExcel.put(GERAL,valoresFormatados);  // Insere os valores encontrados
+
+               /*  if (!geralValores.isEmpty()) {
                     resultadosParaExcel.put(GERAL, geralValores);  // Insere os valores encontrados
+                    System.out.println("L115 "+resultadosParaExcel);
                 } else {
                     System.out.println("Nenhum valor encontrado para GERAL.XLS");
-                }
+                } */
             }
 
             // Buscar valores para o arquivo SETOR 2 SERRA.XLS e insere no 'resultadosParaExcel'
             if (fileData.containsKey(SERRA)) {
                 List<String> serraValores = buscarValoresPorNomeRetonarLista(fileData, SERRA, NOME_PROCURADO);
-                if (!serraValores.isEmpty()) {
+                ResultadoPolo resultadoSerra = ResultadoPolo.processarValores(SERRA, serraValores);
+                List<String> valoresFormatados = List.of(            
+                    "QTD -> " + resultadoSerra.getQuantidade(),
+                    "VALOR -> " + resultadoSerra.getValor()
+                );
+                resultadosParaExcel.put(SERRA,valoresFormatados);  // Insere os valores encontrados
+
+               /*  if (!serraValores.isEmpty()) {
                     resultadosParaExcel.put(SERRA, serraValores);  // Insere os valores encontrados
                 } else {
                     System.out.println("Nenhum valor encontrado para SETOR 2 SERRA.XLS");
-                }
+                } */
             }
 
             // Buscar valores para o arquivo SETOR 3 PETROLINA.XLS e insere no 'resultadosParaExcel'
             if (fileData.containsKey(PETROLINA)) {
                 List<String> petrolinaValores = buscarValoresPorNomeRetonarLista(fileData,PETROLINA, NOME_PROCURADO);
-                if (!petrolinaValores.isEmpty()) {
+                ResultadoPolo resultadoPetrolina = ResultadoPolo.processarValores(PETROLINA, petrolinaValores);
+                List<String> valoresFormatados = List.of(            
+                    "QTD -> " + resultadoPetrolina.getQuantidade(),
+                    "VALOR -> " + resultadoPetrolina.getValor()
+                );
+                resultadosParaExcel.put(PETROLINA,valoresFormatados);  // Insere os valores encontrados
+
+                /* if (!petrolinaValores.isEmpty()) {
                     resultadosParaExcel.put(PETROLINA, petrolinaValores);  // Insere os valores encontrados
                 } else {
                     System.out.println("Nenhum valor encontrado para SETOR 3 PETROLINA.XLS");
-                }
+                } */
             }
             if(fileData.containsKey(MATRIZ)){
                 List<String> matrizValores = buscarValoresPorNomeRetonarLista(fileData, MATRIZ, NOME_PROCURADO);
-                if (!matrizValores.isEmpty()) {
+                ResultadoPolo resultadoMatriz = ResultadoPolo.processarValores(MATRIZ, matrizValores);
+                List<String> valoresFormatados = List.of(            
+                    "QTD -> " + resultadoMatriz.getQuantidade(),
+                    "VALOR -> " + resultadoMatriz.getValor()
+                );
+                resultadosParaExcel.put(MATRIZ,valoresFormatados);  // Insere os valores encontrados
+
+                /* if (!matrizValores.isEmpty()) {
                     resultadosParaExcel.put(MATRIZ, matrizValores);  // Insere os valores encontrados
                 } else {
                     System.out.println("Nenhum valor encontrado para SETOR 4 MATRIZ.XLS");
-                }
+                } */
             }
             if(fileData.containsKey(CARUARU)){
                 List<String> caruaruValores = buscarValoresPorNomeRetonarLista(fileData, CARUARU, NOME_PROCURADO);
-                if (!caruaruValores.isEmpty()) {
+                ResultadoPolo resultadoCaruaru = ResultadoPolo.processarValores(CARUARU, caruaruValores);
+
+                // Converte para List<String> e armazena no mapa
+                List<String> valoresFormatados = List.of(            
+                    "QTD -> " + resultadoCaruaru.getQuantidade(),
+                    "VALOR -> " + resultadoCaruaru.getValor()
+                );
+                resultadosParaExcel.put(CARUARU,valoresFormatados);  // Insere os valores encontrados
+                
+
+              /*   if (!caruaruValores.isEmpty()) {
                     resultadosParaExcel.put(CARUARU, caruaruValores);  // Insere os valores encontrados
                 } else {
                     System.out.println("Nenhum valor encontrado para SETOR 5 CARUARU.XLS");
-                }
+                } */
             }
-            if(fileData.containsKey(GARANHUNS)){
-                List<String> garanhunsValores = buscarValoresPorNomeRetonarLista(fileData, GARANHUNS, NOME_PROCURADO);
-                if (!garanhunsValores.isEmpty()) {
-                    resultadosParaExcel.put(GARANHUNS, garanhunsValores);  // Insere os valores encontrados
-                } else {
-                    System.out.println("Nenhum valor encontrado para SETOR 6 GARANHUNS.XLS");
-                }
-            }
-            if(fileData.containsKey(SITUACAO_MENSAGEIROS)){
-                List<String> situacaoMensageirosValores = buscarValoresPorNomeRetonarLista(fileData, SITUACAO_MENSAGEIROS, NOME_PROCURADO2);
+
+            if (fileData.containsKey(GARANHUNS)) {
+            List<String> garanhunsValores = buscarValoresPorNomeRetonarLista(fileData, GARANHUNS, NOME_PROCURADO);           
+
+            ResultadoPolo resultadoGaranhuns = ResultadoPolo.processarValores(GARANHUNS, garanhunsValores);
+
+            // Converte para List<String> e armazena no mapa
+            List<String> valoresFormatados = List.of(            
+                "QTD -> " + resultadoGaranhuns.getQuantidade(),
+                "VALOR -> " + resultadoGaranhuns.getValor()
+            );
+            resultadosParaExcel.put(GARANHUNS,valoresFormatados);  // Insere os valores encontrados
+            
+            
+           /*  //System.out.println("L159 "+garanhunsValores.size() );
+            
+            if (garanhunsValores.size() < 4) { // Garante que há elementos suficientes na lista
+                System.out.println("Erro: Lista garanhunsValores não contém dados suficientes.");
+                return;
+            }           
+
+            // Pegamos os textos brutos das linhas
+            String textoQtd = garanhunsValores.get(2);  // Exemplo: "Linha 20 - Column7 -> 5538"
+            String textoValor = garanhunsValores.get(3);  // Exemplo: "Linha 20 - Column9 -> R$ 166544,63"
+
+            // Captura apenas números inteiros da quantidade (valores após "-> ")
+            String qtd = textoQtd.contains("->") ? textoQtd.split("->")[1].trim() : "0";
+
+            // Converte a string para inteiro
+            int qtdInt;
+            try {
+                qtdInt = Integer.parseInt(qtd.replaceAll("\\D", "")); // Remove qualquer caractere não numérico
+            } catch (NumberFormatException e) {
+                qtdInt = 0; // Define como 0 se a conversão falhar
+                System.err.println("Erro ao converter qtd para inteiro: " + e.getMessage());
+}
+
+            // Captura do valor monetário com o padrão brasileiro
+            Pattern patternValor = Pattern.compile("([\\d.]+,\\d{2})");
+            Matcher matcherValor = patternValor.matcher(textoValor);
+            String valorParaConverter = matcherValor.find() ? matcherValor.group(1) : "0";
+            String valorStr = valorParaConverter.replace(",", "."); // Converte para o formato numérico
+            double valor = Double.parseDouble(valorStr);
+
+            List<Object> valoresObj = List.of("DEMONSTRATIVO -> Total","QTD -> "+ qtdInt, "VALOR -> "+valor); // Exemplo com tipos diferentes
+
+            // Convertendo para List<String>
+            List<String> garanhunsValoresDemonstrativo = valoresObj.stream()
+                .map(Object::toString) // Converte cada elemento para String
+                .collect(Collectors.toList());
+
+           // resultadosParaExcel.put(GARANHUNS, garanhunsValoresDemonstrativo);  // Insere os valores encontrados
+
+
+           // System.out.println("Valor extraído: " +  resultadosParaExcel);
+            */
+        }
+        
+        if(fileData.containsKey(SITUACAO_MENSAGEIROS)){
+               /*  List<String> situacaoMensageirosValores = buscarValoresPorNomeRetonarLista(fileData, SITUACAO_MENSAGEIROS, NOME_PROCURADO2);
                 if (!situacaoMensageirosValores.isEmpty()) {
-                    resultadosParaExcel.put(SITUACAO_MENSAGEIROS, situacaoMensageirosValores);  // Insere os valores encontrados
+                    ResultadoPolo resultadoSituacaoMensageiro = ResultadoPolo.processarValores(SITUACAO_MENSAGEIROS, situacaoMensageirosValores);
+
+                    // Converte para List<String> e armazena no mapa
+                    List<String> valoresFormatados = List.of(            
+                        "QTD -> " + resultadoSituacaoMensageiro.getQuantidade(),
+                        "VALOR -> " + resultadoSituacaoMensageiro.getValor()
+                    );
+                    resultadosParaExcel.put(SITUACAO_MENSAGEIROS,valoresFormatados);  // Insere os valores encontrados
+            
+                    System.out.println("221 " + situacaoMensageirosValores);
+                    //resultadosParaExcel.put(SITUACAO_MENSAGEIROS, situacaoMensageirosValores);  // Insere os valores encontrados
+                } else {
+                    System.out.println("Nenhum valor encontrado para GERAL SITUAÇÃO MENS.xls");
+                } */
+
+                //Workbook workbook2 = new XSSFWorkbook(new FileInputStream(filePath));
+                Sheet sheet =workbook.getSheetAt(0); // Assumindo que os dados estão na primeira aba
+                System.out.println("L238 "+sheet.getSheetName());
+                System.out.println(" L239 "+sheet);
+                            
+                List<String> situacaoMensageirosValores = new ArrayList<>();
+            
+                for (int rowIndex = 6; rowIndex <= sheet.getLastRowNum(); rowIndex++) { // Começa na linha 7 (índice 6)
+                    Row row = sheet.getRow(rowIndex);
+                    if (row == null) continue; // Ignora linhas vazias
+            
+                    // Coluna 0 contém código do mensageiro
+                    Cell cellCodigo = row.getCell(0);
+                    if (cellCodigo == null || cellCodigo.getCellType() != CellType.NUMERIC) continue;
+            
+                    int codigoMensageiro = (int) cellCodigo.getNumericCellValue();
+            
+                    // Coluna 1 contém nome do mensageiro
+                    Cell cellNome = row.getCell(1);
+                    String nomeMensageiro = (cellNome != null) ? cellNome.getStringCellValue().trim() : "N/A";
+            
+                    // Coluna 2 contém um valor associado
+                    Cell cellValor = row.getCell(2);
+                    double valorMensageiro = (cellValor != null && cellValor.getCellType() == CellType.NUMERIC) ? cellValor.getNumericCellValue() : 0.0;
+            
+                    // Adiciona os valores extraídos à lista
+                    situacaoMensageirosValores.add(codigoMensageiro + " - " + nomeMensageiro + " - " + valorMensageiro);
+                    System.out.println("Linha " + rowIndex + " -> " + codigoMensageiro + " - " + nomeMensageiro + " - " + valorMensageiro);
+                }
+            
+                //workbook.close(); // Fecha o arquivo após a leitura
+            
+                if (!situacaoMensageirosValores.isEmpty()) {
+                    ResultadoPolo resultadoSituacaoMensageiro = ResultadoPolo.processarValores(SITUACAO_MENSAGEIROS, situacaoMensageirosValores);
+            
+                    // Formata os valores
+
+                    List<String> valoresFormatados = List.of(            
+                        "QTD -> " + resultadoSituacaoMensageiro.getQuantidade(),
+                        "VALOR -> " + resultadoSituacaoMensageiro.getValor()
+                    );
+                    resultadosParaExcel.put(SITUACAO_MENSAGEIROS, valoresFormatados);
+                    
+                    System.out.println("Dados processados para Situação Mensageiros: " + valoresFormatados);
                 } else {
                     System.out.println("Nenhum valor encontrado para GERAL SITUAÇÃO MENS.xls");
                 }
             }
         } 
-            //System.out.println(fileData);
-                    // Verifique se a chave está correta antes de chamar a função de busca
-           // System.out.println("Procurando em fileData para GERAL.XLS: " + fileData.containsKey(GERAL));
-           // System.out.println("Procurando em fileData para SETOR 2 SERRA.XLS: " + fileData.containsKey(SERRA));
-           // System.out.println("Procurando em fileData para SETOR 3 PETROLINA.XLS: " + fileData.containsKey(PETROLINA));
-             
+        // Fechando o arquivo             
         workbook.close();
-         List<Map<String, Map<String, String>>> convertedData = new ArrayList<>();
+
+        List<Map<String, Map<String, String>>> convertedData = new ArrayList<>();
 
         for (Map.Entry<String, List<String>> entry : resultadosParaExcel.entrySet()) {
             // Para cada arquivo (como 'GERAL.XLS'), vamos criar um Map<String, String> para armazenar os dados
@@ -225,11 +347,12 @@ public class XlsProcessor implements FileProcessor {
             // Adicionamos a seção na lista de dados convertidos
             convertedData.add(section);
         }
-
-
-        // **Chamar a classe ExcelWriter para salvar os dados**
-       ExcelWriter excelWriter = new ExcelWriter();
-       //excelWriter.escreverDados(List.of(fileData)); // Converte para lista para compatibilidade
+       
+      
+        System.out.println("📌 Conteúdo que será salvo no Excel:");
+        for (Map.Entry<String, List<String>> entry : resultadosParaExcel.entrySet()) {
+            System.out.println("🔹 " + entry.getKey() + " -> " + entry.getValue());
+        }
        excelWriter.escreverDados(convertedData); 
 
         fis.close();
@@ -278,6 +401,16 @@ public class XlsProcessor implements FileProcessor {
         System.out.println("Arquivo final gerado: " + outputPath);
     }
 
+    private Map<String, String> formatarDadosDoMapa(Map<String, String> dados, String linhaReferencia) {
+        Map<String, String> dadosFormatados = new HashMap<>();
+    
+        dadosFormatados.put("Caixa", dados.get(linhaReferencia + " - Column1"));
+        dadosFormatados.put("QTD", dados.get(linhaReferencia + " - Column7"));
+        dadosFormatados.put("Valor", dados.get(linhaReferencia + " - Column9"));
+    
+        return dadosFormatados;
+    }
+
     private Map<String, String> mergeData(List<Map<String, String>> data) {
         Map<String, String> merged = new HashMap<>();
         int rowIndex = 1;
@@ -317,7 +450,7 @@ public class XlsProcessor implements FileProcessor {
                 // Extraindo o número da linha corretamente
                 String[] partes =  chave.split(" - ");
                 String linhaBase = partes.length > 1 ? partes[0] : ""; // Exemplo: "Linha 17"
-                System.out.println("Valores completos da " + linhaBase + ":");
+                //System.out.println("Valores completos da " + linhaBase + ":");
 
                 for (Map.Entry<String, String> linhaEntry : dadosArquivo.entrySet()) {
                     if (linhaEntry.getKey().startsWith(linhaBase)) {
@@ -352,7 +485,7 @@ public class XlsProcessor implements FileProcessor {
             String valor = normalizarTexto(entry.getValue().trim());
     
             if (valor.equals(nomeProcurado)) {
-                System.out.println("Encontrado: " + chave + " -> " + valor);
+                //System.out.println("Encontrado: " + chave + " -> " + valor);
     
                 // Extraindo a linha base (exemplo: "Linha 17")
                 String[] partes = chave.split(" - ");

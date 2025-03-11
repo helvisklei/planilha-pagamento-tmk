@@ -34,6 +34,11 @@
             <version>5.2.3</version>
         </dependency>
         <dependency>
+        <groupId>org.apache.poi</groupId>
+            <artifactId>poi-scratchpad</artifactId>
+            <version>5.2.3</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml-schemas</artifactId>
             <version>4.1.2</version>
@@ -48,6 +53,11 @@
             <artifactId>commons-collections4</artifactId>
             <version>4.4</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>1.11.0</version> <!-- Versão segura -->
+        </dependency>
 
         <!-- Dependência do Log4j2 -->
         <dependency>
@@ -60,13 +70,21 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.21</version>
+            <version>1.26.2</version>
         </dependency>
+
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
             <version>3.6.1</version>
         </dependency>
+        
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.15.1</version> <!-- Versão segura -->
+         </dependency>
+
 
         <!-- Dependência para a API StAX -->
         <dependency>
@@ -80,6 +98,11 @@
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>17.0.2</version> <!-- Versão compatível com seu Java -->
         </dependency>
         <!-- Adiciona outras dependências do JavaFX se necessário -->
     </dependencies>

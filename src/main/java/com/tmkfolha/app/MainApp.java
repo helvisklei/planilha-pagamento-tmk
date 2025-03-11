@@ -2,9 +2,9 @@ package com.tmkfolha.app;
 
 import com.tmkfolha.processor.CsvProcessor;
 import com.tmkfolha.processor.XlsProcessor;
+import com.tmkfolha.util.BarraProgresso;
 import com.tmkfolha.processor.FileProcessor;
 import com.tmkfolha.processor.ProcessXlsMapper;
-
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -15,40 +15,49 @@ import javafx.stage.Stage;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.control.ProgressBar;
-
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 
+/**
+ * Classe principal da aplicação que inicializa a interface gráfica e gerencia o processamento de arquivos.
+ * Utiliza JavaFX para a interface do usuário e permite a seleção e processamento de arquivos CSV e XLS.
+ */
 public class MainApp extends Application {
+    private ProgressBar progressBar; // Barra de progresso para indicar o progresso do processamento
 
-    @Override
+    /**
+     * Método de inicialização da interface gráfica da aplicação.
+     * @param primaryStage Janela principal da aplicação.
+     */
+    @Override    
     public void start(Stage primaryStage) {
-        // Configuração da janela principal
+        this.progressBar = new ProgressBar(); // Inicializa a barra de progresso
         primaryStage.setTitle("Processador de Arquivos");
 
         // Carregar a imagem do logo
         Image image = new Image("file:src/main/resources/logo.png");
         ImageView imageView = new ImageView(image);
         imageView.setPreserveRatio(true);
-        imageView.setFitWidth(300); // Ajuste o tamanho conforme necessário
+        imageView.setFitWidth(300);
 
-        // Criar um Rectangle para usar como clip e arredondar as bordas
-        Rectangle clip = new Rectangle(300, 300); // Inicialmente, defina o tamanho do cli
-       // clip = new Rectangle(imageView.getFitWidth(), imageView.getFitHeight());
-        clip.setArcWidth(30);  // Ajuste o valor para arredondar mais ou menos as bordas
-        clip.setArcHeight(30); // Ajuste o valor para arredondar mais ou menos as bordas
+        // Criar um Rectangle para usar como clip e arredondar as bordas da imagem
+        Rectangle clip = new Rectangle(300, 300);
+        clip.setArcWidth(30);
+        clip.setArcHeight(30);
         imageView.setClip(clip);
 
-        // Adicionar listener para ajustar o tamanho do clip dinamicamente
+        // Ajuste dinâmico do clip da imagem conforme necessário
         imageView.fitWidthProperty().addListener((observable, oldValue, newValue) -> {
             clip.setWidth(newValue.doubleValue());
         });
         imageView.fitHeightProperty().addListener((observable, oldValue, newValue) -> {
             clip.setHeight(newValue.doubleValue());
         });
-
 
         // Verifica se a imagem foi carregada corretamente
         if (image.isError()) {
@@ -64,7 +73,7 @@ public class MainApp extends Application {
         loadButton.setGraphic(loadIconView);
         loadButton.setOnAction(e -> processFiles(primaryStage));
 
-        // Botão para finalizar
+        // Botão para finalizar a aplicação
         Button finalizeButton = new Button("Finalizar");
         Image finalizeIcon = new Image("file:src/main/resources/finalize.png");
         ImageView finalizeIconView = new ImageView(finalizeIcon);
@@ -73,73 +82,64 @@ public class MainApp extends Application {
         finalizeButton.setGraphic(finalizeIconView);
         finalizeButton.setOnAction(e -> primaryStage.close());
 
-        // Barra de progresso
-        ProgressBar progressBar = new ProgressBar();
-        progressBar.setProgress(0); // Inicia com 0%
-        progressBar.setPrefWidth(300); // Largura da barra de progresso
+        // Configuração da barra de progresso
+        progressBar.setProgress(0);
+        progressBar.setPrefWidth(300);
         progressBar.setPrefHeight(25);
 
-        // Layout com espaçamento ajustado
+        // Layout principal
         VBox vbox = new VBox(10, imageView, loadButton, finalizeButton, progressBar);
         vbox.setAlignment(Pos.CENTER);
-        vbox.setStyle("-fx-background-color:rgb(238, 10, 10); -fx-padding: 10;");
+        vbox.setStyle("-fx-background-color:rgb(236, 94, 94); -fx-padding: 10;");
 
-        // Definindo o tamanho mínimo da cena para garantir boa visualização
-        Scene scene = new Scene(vbox, 400, 400); // Tamanho maior para garantir uma boa visualização
-
-        // Exibe a interface
+        Scene scene = new Scene(vbox, 400, 400);
         primaryStage.setScene(scene);
-        primaryStage.setMinWidth(300); // Definir largura mínima
-        primaryStage.setMinHeight(300); // Definir altura mínima
+        primaryStage.setMinWidth(300);
+        primaryStage.setMinHeight(300);
         primaryStage.show();
     }
 
+    /**
+     * Método responsável por abrir um seletor de arquivos e processá-los.
+     * @param primaryStage Janela principal da aplicação.
+     */
     private void processFiles(Stage primaryStage) {
-        // Criação do JFileChooser para escolher múltiplos arquivos
         JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setMultiSelectionEnabled(true);  // Permitir seleção múltipla de arquivos
-
-        // Filtra apenas arquivos CSV e XLS
+        fileChooser.setMultiSelectionEnabled(true);
         FileNameExtensionFilter filter = new FileNameExtensionFilter("Arquivos CSV e XLS", "csv", "xls", "xlsx");
         fileChooser.setFileFilter(filter);
 
-        // Exibe o dialog para selecionar arquivos
         int returnValue = fileChooser.showOpenDialog(null);
 
-        // Verifica se o usuário selecionou arquivos
         if (returnValue == JFileChooser.APPROVE_OPTION) {
-            File[] files = fileChooser.getSelectedFiles();  // Obtém os arquivos selecionados
-            int totalFiles = files.length; // Número total de arquivos a serem processados
-            int processedFiles = 0; // Contador de arquivos processados
+            File[] files = fileChooser.getSelectedFiles();
+            int totalFiles = files.length;
+            int processedFiles = 0;
 
-            // Barra de progresso
-            ProgressBar progressBar = (ProgressBar) primaryStage.getScene().getRoot().getChildrenUnmodifiable().get(3);
+            // Objeto para atualizar a barra de progresso
+            BarraProgresso barraProgresso = new BarraProgresso(progressBar);
 
-            // Loop para processar os arquivos selecionados
             for (File file : files) {
                 try {
-                    // Verifica a extensão do arquivo
-                    String fileName = file.getName().toLowerCase().toString().trim();
-                    FileProcessor processor;
+                    String fileName = file.getName().toLowerCase().trim();
+                    FileProcessor processor = null;
 
                     if (fileName.endsWith(".csv")) {
                         processor = new CsvProcessor();
                     } else if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx")) {
-                        processor = new XlsProcessor();
-                       // System.out.println("Arquivo XLS ou XLSX:  L128 Mainapp" + processor);
+                        if (!isValidXls(file)) {
+                            System.err.println("O arquivo " + file.getName() + " não é um XLS válido. Pulando...");
+                            continue;
+                        }
+                        processor = new XlsProcessor(barraProgresso);
                     } else {
                         System.err.println("Arquivo não suportado: " + file.getName());
-                        continue; // Pula para o próximo arquivo se não for CSV ou XLS
+                        continue;
                     }
 
-                    //System.out.println("Processando arquivo: " + file.getAbsolutePath());
-                                        
-                    processor.processFile(file.getAbsolutePath());  // Processa o arquivo
-
-                    // Atualiza a barra de progresso
+                    processor.processFile(file.getAbsolutePath());
                     processedFiles++;
-                    progressBar.setProgress((double) processedFiles / totalFiles); // Atualiza o progresso
-
+                    barraProgresso.atualizarProgresso(processedFiles, totalFiles);
                     System.out.println("Arquivo processado com sucesso: " + file.getName());
                 } catch (IOException e) {
                     System.err.println("Erro de I/O ao processar o arquivo " + file.getName() + ": " + e.getMessage());
@@ -153,7 +153,25 @@ public class MainApp extends Application {
         }
     }
 
+    /**
+     * Método principal que inicia a aplicação JavaFX.
+     * @param args Argumentos da linha de comando.
+     */
     public static void main(String[] args) {
         launch(args);
+    }
+
+    /**
+     * Verifica se um arquivo XLS é um documento OLE2 válido.
+     * @param file Arquivo a ser verificado.
+     * @return true se o arquivo for um XLS válido, false caso contrário.
+     */
+    private static boolean isValidXls(File file) {
+        try (FileInputStream fis = new FileInputStream(file)) {
+            new POIFSFileSystem(fis).close();
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 }

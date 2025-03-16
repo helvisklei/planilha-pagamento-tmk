@@ -70,6 +70,19 @@ public class ExcelWriter {
                 cellTitulo.setCellValue(titulo);
                 cellTitulo.setCellStyle(estiloTitulo);
 
+                int cl = 0;
+                Row linhaCabecalho = sheet.createRow(rowIndex++);
+                Cell colunaCabecalho = linhaCabecalho.createCell(cl++);
+                String[] headers = {"CÓD.", "DRT", "NOME", "GRATIFICAÇÃO (R$)"};
+                for (int i = 0; i < headers.length; i++) {
+                       linhaCabecalho.createCell(i).setCellValue(headers[i]);
+
+                       // linhaCabecalho.createCell(0).setCellValue("CÓD.");
+                       // row.createCell(1).setCellValue(dados.get("DRT"));
+                        //row.createCell(2).setCellValue(dados.get("NOME"));
+                       // row.createCell(3).setCellValue(dados.get("GRATIFICAÇÃO (R$)"));
+                }
+
                 if (!registros.isEmpty()) {
                     // Criar cabeçalhos
                     Row rowCabecalho = sheet.createRow(rowIndex++);
@@ -77,7 +90,7 @@ public class ExcelWriter {
                     for (String chave : registros.keySet()) {
                         System.out.println("L78 " + chave);
                         Cell cellCabecalho = rowCabecalho.createCell(coluna++);
-                        cellCabecalho.setCellValue(chave);
+                        cellCabecalho.setCellValue(chave);                       
                     }
 
                     // Criar linha de valores
@@ -91,8 +104,15 @@ public class ExcelWriter {
                         cellDado.setCellValue(valor);
                         cellDado.setCellStyle(style);
                     }
+/* 
+                    for (Map<String, String> dados : entry.get(registros)) {
+                        Row row = sheet.createRow(rowIndex++);
+                        row.createCell(0).setCellValue(dados.get("CÓD."));
+                        row.createCell(1).setCellValue(dados.get("DRT"));
+                        row.createCell(2).setCellValue(dados.get("NOME"));
+                        row.createCell(3).setCellValue(dados.get("GRATIFICAÇÃO (R$)"));
+                    } */
                 }
-
                 rowIndex++; // Adiciona uma linha em branco para separação
             }
         }

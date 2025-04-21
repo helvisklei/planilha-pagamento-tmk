@@ -1,0 +1,43 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Debug Current File",
+            "request": "launch",
+            "mainClass": "${file}",
+            "vmArgs": "--enable-preview",
+            "console": "internalConsole"
+        },
+        {
+            "type": "java",
+            "name": "Debug MainApp",
+            "request": "launch",
+            "mainClass": "com.tmkfolha.app.MainApp",
+            "projectName": "tmkfolha",
+            "vmArgs": "--enable-preview",
+            "args": [],
+            "console": "internalConsole"
+        },
+        {
+            "type": "java",
+            "name": "Debug PoloSerra",
+            "request": "launch",
+            "mainClass": "com.tmkfolha.app.PoloSerra",
+            "projectName": "tmkfolha",
+            "vmArgs": "--enable-preview",
+            "console": "internalConsole"
+        },
+        {
+            "type": "java",
+            "name": "Debug Maven Test",
+            "request": "launch",
+            "mainClass": "org.junit.platform.console.ConsoleLauncher",
+            "args": [
+                "--class-path=${classpath}",
+                "--scan-classpath"
+            ],
+            "vmArgs": "--enable-preview"
+        }
+    ]
+}

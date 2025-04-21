@@ -1,3 +1,8 @@
 {
-    "java.configuration.updateBuildConfiguration": "interactive"
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "java.project.sourcePaths": ["src/main/java", "src/test/java"],
+    "java.jdt.ls.vmargs": "--add-modules=ALL-SYSTEM --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED",
+    "maven.executable.path": "mvn",
+    "java.debug.settings.hotCodeReplace": "auto",
+    "java.debug.settings.enableRunDebugCodeLens": true
 }

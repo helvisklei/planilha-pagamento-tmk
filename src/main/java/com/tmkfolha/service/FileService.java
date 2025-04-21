@@ -1,11 +1,10 @@
 package com.tmkfolha.service;
 
-import com.tmkfolha.processor.CsvProcessor;
-import com.tmkfolha.processor.XlsxProcessor;
 import com.tmkfolha.processor.FileProcessor;
 import com.tmkfolha.processor.XlsProcessor;
 import com.tmkfolha.processor.ExcelWriter;
 import com.tmkfolha.util.BarraProgresso;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +22,7 @@ public class FileService {
      * @param outputPath Caminho de saída para salvar os dados processados.
      * @throws Exception Caso ocorra um erro durante o processamento dos arquivos.
      */
-    public void processFiles(List<String> filePaths, String outputPath) throws Exception {
+    public void processFiles(List<String> filePaths, String outputPath,String mes, int ano) throws Exception {
         // Lista para armazenar os dados processados de todos os arquivos
         List<Map<String, Map<String, String>>> allData = new ArrayList<>();
 
@@ -35,16 +34,16 @@ public class FileService {
             FileProcessor processor;
 
             // Verifica a extensão do arquivo e seleciona o processador apropriado
-            if (filePath.endsWith(".csv")) {
+           /*  if (filePath.endsWith(".csv")) {
                 processor = new CsvProcessor();
-            } else if (filePath.endsWith(".xlsx") || filePath.endsWith(".xls")) {
+            } else */ if (filePath.endsWith(".xlsx") || filePath.endsWith(".xls")) {
                 processor = new XlsProcessor(barraProgresso); // Processador de arquivos Excel
             } else {
                 throw new Exception("Tipo de arquivo não suportado: " + filePath);
             }
 
             // Executa o processamento do arquivo
-            processor.processFile(filePath);
+            processor.processFile(filePath,mes,ano);
         }
     }
 }

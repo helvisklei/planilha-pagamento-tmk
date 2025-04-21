@@ -189,8 +189,7 @@ import java.util.stream.Collectors;
             }
             System.out.println();
         }
-    }
-
+    }  
     /**
      * Busca em todo o arquivo, retornando todas as linhas que contêm o valor procurado em qualquer coluna
      * Faz uma busca personalizada para o conjuto de dados retornando mapeado de mapa.
@@ -200,7 +199,60 @@ import java.util.stream.Collectors;
      * @return retorna dinamicamente o valor especifico que esteja dentro do arquivo em qualquer coluna.
      * 
      */
+
     public static Map<String, Map<String, String>> buscarValoresPorNomeRetornaMapaDeMapaSemColunaEspecifica(
+            Map<String, Map<String, String>> fileData,
+            String arquivo,
+            String... nomesProcurados ) {
+            Map<String, Map<String, String>> resultados = new LinkedHashMap<>();
+
+        if (!fileData.containsKey(arquivo)) {
+            System.out.println("Arquivo não encontrado.");
+            return resultados;
+        }
+
+        Map<String, String> dadosArquivo = fileData.get(arquivo);
+        Set<String> nomesProcuradosSet = new HashSet<>(Arrays.asList(nomesProcurados));
+
+        System.out.println("🔍 Buscando por: " + nomesProcuradosSet);
+
+        // Filtra todas as linhas que possuem o valor procurado em qualquer coluna
+        dadosArquivo.entrySet().stream()
+            .filter(entry -> nomesProcuradosSet.isEmpty() || nomesProcuradosSet.contains(entry.getValue().trim()))
+            .map(entry -> entry.getKey().split(" - ")[0])  // Pega a linha onde o valor foi encontrado
+            .distinct()
+            .forEach(linha -> {
+               // Obtém o valor do "PÓLO" (coluna 4)
+                String chavePolo = dadosArquivo.getOrDefault(linha + " - Column4", "DESCONHECIDO").trim();
+
+                System.out.println("✔ Encontrado PÓLO: " + chavePolo + " na linha " + linha);
+
+                // Adiciona todas as colunas dessa linha ao resultado agrupado pelo PÓLO
+                dadosArquivo.entrySet().stream()
+                    .filter(e -> e.getKey().startsWith(linha + " - "))
+                    .forEach(e -> {
+                    resultados.computeIfAbsent(chavePolo, k -> new LinkedHashMap<>())
+                    .put(e.getKey(), e.getValue());
+                        System.out.println("📌 Adicionando ao PÓLO " + chavePolo + ": " + e.getKey() + " -> " + e.getValue());
+                });
+            });
+
+            System.out.println("📊 Mapa final: " + resultados);
+            return resultados;
+    }
+
+      
+
+    /**
+     * Busca em todo o arquivo, retornando todas as linhas que contêm o valor procurado em qualquer coluna
+     * Faz uma busca personalizada para o conjuto de dados retornando mapeado de mapa.
+     * @param  fileData onde o mapa dos dados estão.
+     * @param arquivo nome da chave do mapa
+     * @param nomesProcurados o nome que será procurado na coluna especifica do arquivo
+     * @return retorna dinamicamente o valor especifico que esteja dentro do arquivo em qualquer coluna.
+     * A linha nesse codigo é a chave do mapa
+     */
+   /*  public static Map<String, Map<String, String>> buscarValoresPorNomeRetornaMapaDeMapaSemColunaEspecifica(
         Map<String, Map<String, String>> fileData,
         String arquivo,
         String... nomesProcurados
@@ -214,6 +266,7 @@ import java.util.stream.Collectors;
 
         Map<String, String> dadosArquivo = fileData.get(arquivo);
         Set<String> nomesProcuradosSet = new HashSet<>(Arrays.asList(nomesProcurados));
+       // System.out.println("L217 Japp"+nomesProcuradosSet);
 
         // Filtra todas as linhas que possuem o valor procurado em qualquer coluna
         dadosArquivo.entrySet().stream()
@@ -225,6 +278,7 @@ import java.util.stream.Collectors;
              dadosArquivo.entrySet().stream()
                 .filter(e -> e.getKey().startsWith(linha + " - "))
                 .forEach(e -> resultados.computeIfAbsent(linha, k -> new LinkedHashMap<>()).put(e.getKey(), e.getValue()));
+                //System.out.println("L229 Japp "+linha);
             });
 
         // Ordena as entradas do mapa conforme a chave
@@ -239,7 +293,7 @@ import java.util.stream.Collectors;
                 (e1, e2) -> e1,
                 LinkedHashMap::new
             ));
-        }
+        } */
 
     
     public static String calcularPercentualPorPolo(Map<String, Map<String, String>> fileData, String key, String polo, double rendimento) {

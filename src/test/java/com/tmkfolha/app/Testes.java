@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import com.tmkfolha.app.controllers.Funcionario;
 import com.tmkfolha.app.controllers.ProcessadorDados;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,6 +55,6 @@ public class Testes {
         assertEquals(16986.0, funcionario.getRecebimento());
         assertEquals(0.9165, funcionario.getRendimento());
         assertEquals(0.06, funcionario.getGratificacaoPercentual());
-        assertEquals(1019.16, funcionario.getGratificacaoValor(), 0.01); // Tolerância para valores decimais
+        assertEquals(new BigDecimal("1019.16"), funcionario.getGratificacaoValor()); // Tolerância para valores decimais
     }
 }

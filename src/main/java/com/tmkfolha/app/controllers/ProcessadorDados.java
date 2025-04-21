@@ -1,4 +1,5 @@
 package com.tmkfolha.app.controllers;
+import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.util.*;
 import java.util.regex.*;
@@ -91,12 +92,17 @@ public class ProcessadorDados {
                         double gratificacaoPercentual = parsePercentage(valores[14]);
                         double gratificacaoValor = recebimento * gratificacaoPercentual;
 
+                        BigDecimal recebimentoBD = BigDecimal.valueOf(recebimento);
+                        BigDecimal rendimentoBD = BigDecimal.valueOf(rendimento);
+                        BigDecimal gratificacaoPercentualBD = BigDecimal.valueOf(gratificacaoPercentual);
+                        BigDecimal gratificacaoValorBD = BigDecimal.valueOf(gratificacaoValor);
+
                         Funcionario funcionario = funcionariosPorCodigo.get(codigo);
                         if (funcionario != null) {
-                            funcionario.setRecebimento(recebimento);
-                            funcionario.setRendimento(rendimento);
-                            funcionario.setGratificacaoPercentual(gratificacaoPercentual);
-                            funcionario.setGratificacaoValor(gratificacaoValor);
+                            funcionario.setRecebimento(recebimentoBD);
+                            funcionario.setRendimento(rendimentoBD);
+                            funcionario.setGratificacaoPercentual(gratificacaoPercentualBD);
+                            funcionario.setGratificacaoValor(gratificacaoValorBD);
 
                             System.out.printf("| %-10s | %-15s | %-15s | %-20s | %-15s |\n", 
                                     funcionario.getCodigo(), 
